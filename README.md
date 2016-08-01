@@ -50,7 +50,7 @@ Limit: 20 request / 1 days
   "title" : "Khởi nghiệp? Xem film này đi!",
   "content": "`console.log('Joy (2015)');`",
   "status": "published",
-  "tags": "startup, film"
+  "tag": "startup, film"
 }
 ```
 | key | | value | description |
@@ -58,28 +58,21 @@ Limit: 20 request / 1 days
 | title | required | string | title of a post |
 | content | required | string | markdown content |
 | status | required | string ("draft" or "published") | status of post |
-| tags | option | string (list of string, split by comma) | list of tags |
+| tag | option | string (list of string, split by comma) | list of tags |
 
 #### Response
 a **JSON** object
 ```json
 {
-  "reuqestId": 1,
-  "post": {
-    "title" : "Khởi nghiệp? Xem film này đi!",
-    "content": "`console.log('Joy (2015)');`",
-    "status": "published",
-    "tags": "startup, film"
-  },
-  "status": false,
-  "cause": "token error"
+  "content":"",
+  "status": 422,
+  "cause": "unprocessable entity"
 }
 ```
 | key | value | description |
 |---|---|---|
-| requestId | int | id of request |
-| post | object | content of post request |
-| status | boolean | status of last request, `true` if success |
+| content | string | normaly empty |
+| status | int | http status code |
 | cause | string | failed reason if fail |
 
 ### POST `/api/v1/post/preview`
@@ -96,23 +89,22 @@ Limit: 100 request / 5 minutes
 ```
 | key | | value | description |
 |---|---|---|---|
-| content | required | string | content of post need a preview |
+| content | required | string | content of need-rendered post |
 
 #### Response
 **JSON**
 ```json
 {
-  "requestId": 5,
-  "content": "<strong>content of a post (markdown)</strong>",
-  "status": true,
-  "cause": ""
+  "content":"<html></html>",
+  "status": 422,
+  "cause": "unprocessable entity"
 }
 ```
+
 | key | value | description |
 |---|---|---|
-| requestId | int | id of request |
 | content | string | rendered html of posted content |
-| status | boolean | status of last request, `true` if success |
+| status | int | http status code |
 | cause | string | failed reason if fail |
 
 ### GET `/api/v1/post/hot`
@@ -127,35 +119,15 @@ N/A
 
 ```json
 {
-  "requestId": 10,
-  "status": true,
+  "status": 200,
   "cause": "",
-  "requestedTag": "",
-  "posts": [
+  "content": [
     {
-      "id": 2,
       "title": "Khởi nghiệp? Xem film này đi!",
-      "time": "31/07/2016",
-      "timestamp": 1469898000000,
       "content": "`console.log('Joy (2015)');`",
-      "contentHtml": "<code>console.log('Joy (2015)');</code>",
-      "author": {
-        "name": "Minh Thành",
-        "username": "MinhThanh"
-      },
-      "tags": "til, startup, film"
     }, {
-      "id": 3,
       "title": "Preview",
-      "time": "01/08/2016",
-      "timestamp": 1469984400000,
       "content": "**content of a post (markdown)**",
-      "contentHtml": "<strong>content of a post (markdown)</strong>",
-      "author": {
-        "name": "huydx",
-        "username": "huydx"
-      },
-      "tags": "til, preview, css, html, javascript, nodejs"
     }
   ]
 }
@@ -167,24 +139,16 @@ A json object of post:
 
 | key | value | description |
 |---|---|---|
-| requestId | int | id of request |
-| status | boolean | status of last request, `true` if success |
+| status | int | http status code |
 | cause | string | failed reason if fail |
-| requestedTag | string | null |
-| posts | array | array of 30 recent hot post object |
+| content | array | array of 30 recent hot post object |
 
 **Posts object**
 
 | key | value | description |
 |---|---|---|
-| id | int | id of post |
 | title | string | post title |
-| time | string | post time `dd/mm/yyyy` |
-| timestamp | int | post timetamps |
 | content | string | Markdown content |
-| contentHtml | string | html content |
-| author | object | return info of author |
-| tags | string | list of tags |
 
 
 ### GET `/api/v1/post/newest`
@@ -200,35 +164,16 @@ List of 30 recent newest post.
 
 ```json
 {
-  "requestId": 10,
-  "status": true,
+  "status": 200,
   "cause": "",
-  "requestedTag": "",
-  "posts": [
+  "content": [
     {
-      "id": 2,
       "title": "Khởi nghiệp? Xem film này đi!",
-      "time": "31/07/2016",
-      "timestamp": 1469898000000,
       "content": "`console.log('Joy (2015)');`",
-      "contentHtml": "<code>console.log('Joy (2015)');</code>",
-      "author": {
-        "name": "Minh Thành",
-        "username": "MinhThanh"
-      },
-      "tags": "til, startup, film"
-    }, {
-      "id": 3,
+    }, 
+    {
       "title": "Preview",
-      "time": "01/08/2016",
-      "timestamp": 1469984400000,
       "content": "**content of a post (markdown)**",
-      "contentHtml": "<strong>content of a post (markdown)</strong>",
-      "author": {
-        "name": "huydx",
-        "username": "huydx"
-      },
-      "tags": "til, preview, css, html, javascript, nodejs"
     }
   ]
 }
@@ -241,48 +186,30 @@ Limit: 300 request / 5 minutes
 #### Request
 ```
 {
-  "tagName": "til"
+  "tag_name": "til"
 }
 ```
 
 | key | | value | description |
 |---|---|---|---|
-| tagName | required | string | a tag |
+| tag_name | required | string | a tag |
 
 #### Response
 **JSON**
 
+
 ```json
 {
-  "requestId": 10,
-  "status": true,
+  "status": 200,
   "cause": "",
-  "requestedTag": "til",
-  "posts": [
+  "content": [
     {
-      "id": 2,
       "title": "Khởi nghiệp? Xem film này đi!",
-      "time": "31/07/2016",
-      "timestamp": 1469898000000,
       "content": "`console.log('Joy (2015)');`",
-      "contentHtml": "<code>console.log('Joy (2015)');</code>",
-      "author": {
-        "name": "Minh Thành",
-        "username": "MinhThanh"
-      },
-      "tags": "til, startup, film"
-    }, {
-      "id": 3,
+    }, 
+    {
       "title": "Preview",
-      "time": "01/08/2016",
-      "timestamp": 1469984400000,
       "content": "**content of a post (markdown)**",
-      "contentHtml": "<strong>content of a post (markdown)</strong>",
-      "author": {
-        "name": "huydx",
-        "username": "huydx"
-      },
-      "tags": "til, preview, css, html, javascript, nodejs"
     }
   ]
 }
