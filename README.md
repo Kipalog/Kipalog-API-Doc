@@ -35,82 +35,159 @@ Currently we provide 5 api endpoint:
 
 Each request need to attach above token, for example as below:
 
-```
+```bash
 curl -H "Accept-Charset: application/json" -H "X-Kipalog-Token: 50apc5dac3vwjvbrr8631s42j1veif" http://localhost:3000/api/v1/post/newest | jq
 ```
 
-### POST /api/v1/post
+### POST `/api/v1/post`
 What: To create a new post at kipalog
 Limit: 20 request / 1 days
 
 #### Request
-Json
-
-```
+`METHOD`: POST, an object typed **JSON**, demo:
+```json
 {
-  "title" : title of a post,
-  "content": content of a post (markdown),
-  "status": status of post ("draft" or "published"),
-  "tags": list of tags split by comma ("til,golang")
+  "title" : "Khởi nghiệp? Xem film này đi!",
+  "content": "`console.log('Joy (2015)');`",
+  "status": "published",
+  "tags": "startup, film"
 }
 ```
+| key | | value | description |
+|---|---|---|---|
+| title | required | string | title of a post |
+| content | required | string | markdown content |
+| status | required | string ("draft" or "published") | status of post |
+| tags | option | string (list of string, split by comma) | list of tags |
 
 #### Response
-Json
-
-```
+a **JSON** object
+```json
 {
-  "content":"",
-  "status": status code,
-  "cause": failed reason if fail
+  "reuqestId": 1,
+  "post": {
+    "title" : "Khởi nghiệp? Xem film này đi!",
+    "content": "`console.log('Joy (2015)');`",
+    "status": "published",
+    "tags": "startup, film"
+  },
+  "status": false,
+  "cause": "token error"
 }
 ```
+| key | value | description |
+|---|---|---|
+| requestId | int | id of request |
+| post | object | content of post request |
+| status | boolean | status of last request, `true` if success |
+| cause | string | failed reason if fail |
 
-### POST /api/v1/post/preview
+### POST `/api/v1/post/preview`
 What: To preview a post at kipalog using kipalog markdown engine
 Limit: 100 request / 5 minutes
 
 #### Request
-Json
+**JSON**
 
-```
+```json
 {
-  "content": content of a post (markdown),
+  "content": "**content of a post (markdown)**",
 }
 ```
+| key | | value | description |
+|---|---|---|---|
+| content | required | string | content of post need a preview |
 
 #### Response
-Json
-
-```
+**JSON**
+```json
 {
-  "content": rendered html of posted content,
-  "status": status code,
-  "cause": failed reason if fail
+  "requestId": 5,
+  "content": "<strong>content of a post (markdown)</strong>",
+  "status": true,
+  "cause": ""
 }
 ```
+| key | value | description |
+|---|---|---|
+| requestId | int | id of request |
+| content | string | rendered html of posted content |
+| status | boolean | status of last request, `true` if success |
+| cause | string | failed reason if fail |
 
-### GET /api/v1/post/hot
-What: Get 30 recent hot post
+### GET `/api/v1/post/hot`
+What: Get 30 recent hot post [only publiced post]
 Limit: 300 request / 5 minutes
 
 #### Request
 N/A
 
 #### Response
-Json
+**JSON**
 
+```json
+{
+  "requestId": 10,
+  "status": true,
+  "cause": "",
+  "requestedTag": "",
+  "posts": [
+    {
+      "id": 2,
+      "title": "Khởi nghiệp? Xem film này đi!",
+      "time": "31/07/2016",
+      "timestamp": 1469898000000,
+      "content": "`console.log('Joy (2015)');`",
+      "contentHtml": "<code>console.log('Joy (2015)');</code>",
+      "author": {
+        "name": "Minh Thành",
+        "username": "MinhThanh"
+      },
+      "tags": "til, startup, film"
+    }, {
+      "id": 3,
+      "title": "Preview",
+      "time": "01/08/2016",
+      "timestamp": 1469984400000,
+      "content": "**content of a post (markdown)**",
+      "contentHtml": "<strong>content of a post (markdown)</strong>",
+      "author": {
+        "name": "huydx",
+        "username": "huydx"
+      },
+      "tags": "til, preview, css, html, javascript, nodejs"
+    }
+  ]
+}
 ```
-[
-  "content": {
-    "id": post id,
-    "title": post title,
-    "content": post content
-  },...
-]
-```
+Response a array of post object.
+*Get 30 recent hot post*
 
-### GET /api/v1/post/newest
+A json object of post:
+
+| key | value | description |
+|---|---|---|
+| requestId | int | id of request |
+| status | boolean | status of last request, `true` if success |
+| cause | string | failed reason if fail |
+| requestedTag | string | null |
+| posts | array | array of 30 recent hot post object |
+
+**Posts object**
+
+| key | value | description |
+|---|---|---|
+| id | int | id of post |
+| title | string | post title |
+| time | string | post time `dd/mm/yyyy` |
+| timestamp | int | post timetamps |
+| content | string | Markdown content |
+| contentHtml | string | html content |
+| author | object | return info of author |
+| tags | string | list of tags |
+
+
+### GET `/api/v1/post/newest`
 What: Get 30 recent newest post
 Limit: 300 request / 5 minutes
 
@@ -118,38 +195,95 @@ Limit: 300 request / 5 minutes
 N/A
 
 #### Response
-Json
+**JSON**
+List of 30 recent newest post. 
 
-```
-[
-  "content": {
-    "id": post id,
-    "title": post title,
-    "content": post content
-  },...
-]
+```json
+{
+  "requestId": 10,
+  "status": true,
+  "cause": "",
+  "requestedTag": "",
+  "posts": [
+    {
+      "id": 2,
+      "title": "Khởi nghiệp? Xem film này đi!",
+      "time": "31/07/2016",
+      "timestamp": 1469898000000,
+      "content": "`console.log('Joy (2015)');`",
+      "contentHtml": "<code>console.log('Joy (2015)');</code>",
+      "author": {
+        "name": "Minh Thành",
+        "username": "MinhThanh"
+      },
+      "tags": "til, startup, film"
+    }, {
+      "id": 3,
+      "title": "Preview",
+      "time": "01/08/2016",
+      "timestamp": 1469984400000,
+      "content": "**content of a post (markdown)**",
+      "contentHtml": "<strong>content of a post (markdown)</strong>",
+      "author": {
+        "name": "huydx",
+        "username": "huydx"
+      },
+      "tags": "til, preview, css, html, javascript, nodejs"
+    }
+  ]
+}
 ```
 
-### POST /api/v1/post/bytag
+### POST `/api/v1/post/bytag`
 What: Get 30 recent post by tag
 Limit: 300 request / 5 minutes
 
 #### Request
 ```
 {
-  "tag_name": tag name,
+  "tagName": "til"
 }
 ```
 
-#### Response
-Json
+| key | | value | description |
+|---|---|---|---|
+| tagName | required | string | a tag |
 
-```
-[
-  "content": {
-    "id": post id,
-    "title": post title,
-    "content": post content
-  },...
-]
+#### Response
+**JSON**
+
+```json
+{
+  "requestId": 10,
+  "status": true,
+  "cause": "",
+  "requestedTag": "til",
+  "posts": [
+    {
+      "id": 2,
+      "title": "Khởi nghiệp? Xem film này đi!",
+      "time": "31/07/2016",
+      "timestamp": 1469898000000,
+      "content": "`console.log('Joy (2015)');`",
+      "contentHtml": "<code>console.log('Joy (2015)');</code>",
+      "author": {
+        "name": "Minh Thành",
+        "username": "MinhThanh"
+      },
+      "tags": "til, startup, film"
+    }, {
+      "id": 3,
+      "title": "Preview",
+      "time": "01/08/2016",
+      "timestamp": 1469984400000,
+      "content": "**content of a post (markdown)**",
+      "contentHtml": "<strong>content of a post (markdown)</strong>",
+      "author": {
+        "name": "huydx",
+        "username": "huydx"
+      },
+      "tags": "til, preview, css, html, javascript, nodejs"
+    }
+  ]
+}
 ```
